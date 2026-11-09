@@ -3,4 +3,5 @@ project(KanCompiler C CXX)
 
 set(CMAKE_C_STANDARD 17)
 
-add_executable(KanCompiler main.c)
+add_executable(KanCompiler
+        cradle.c)
