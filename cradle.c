@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 char TAB = '\t';
 
@@ -96,13 +97,59 @@ void emit_ln(const char *s) {
     printf("\r\n");
 }
 
+
+// ========= PART II. parsing expressions
+
+void term(void) {
+    char ch = get_num();
+
+    // Allocate a buffer to format your LLVM string dynamically
+    char buffer[64];
+    // Move the parsed numeric character into register %0
+    snprintf(buffer, sizeof(buffer), "%%0 = add i32 0, %c", ch);
+    emit_ln(buffer);
+}
+
+void add(void) {
+    match('+');
+    term();
+    emit_ln("%2 = add i32 %1, %0");
+}
+
+void subtract(void) {
+    match('-');
+    term();
+    emit_ln("%2 = sub i32 %1, %0");
+}
+
+void expression(void) {
+    term();
+    emit_ln("%1 = add i32 %0, 0");
+
+    switch(look) {
+    case '+':
+        add();
+        break;
+    case '-':
+        subtract();
+        break;
+    default:
+        expected("Addop");
+    }
+}
+
+
 void init(void) {
     get_char();
 }
 
-int main(void) {
-    init();
+// =============== TESTS:
 
+void test1(void) {
+    term();
+}
+
+void test2(void) {
     // Parse the input stream
     char var_name = get_name();
     match('=');
@@ -118,6 +165,18 @@ int main(void) {
 
     emit("value: ");
     emit_ln(label_val);
+}
+
+void test3(void) {
+    expression();
+}
+
+int main(void) {
+    init();
+    //test1();
+    //test2();
+    test3();
+
 
     return 0;
 }
